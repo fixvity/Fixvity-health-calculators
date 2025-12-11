@@ -55,14 +55,55 @@ label{font-size:13px;color:#0b1720;margin-bottom:6px;display:block}
 .results{padding:12px;border-radius:12px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid var(--border);overflow:visible}
 .resultTop{display:flex;gap:16px;align-items:flex-start}
 .leftCol{flex:1}
-.rightCol{flex:0 0 280px;position:relative}
+.rightCol{
+  flex:0 0 300px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  min-width:220px;
+  padding-left:8px;
+}
+.gaugeWrap{
+  width:100%;
+  max-width:320px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:6px 6px 22px;
+  box-sizing:border-box;
+  position:relative;
+}
+.gauge{
+  width:100%;
+  height:auto;
+  display:block;
+  max-height:240px;
+}
+.pointer{
+  position:absolute;
+  width:10px;
+  height:86px;
+  background:#0f1720;
+  border-radius:10px;
+  transform-origin:center bottom;
+  bottom:18px;
+  left:calc(100% - 128px);
+  box-shadow:0 12px 22px rgba(0,0,0,0.14);
+  transition:transform 700ms cubic-bezier(.2,.9,.2,1);
+}
+@media (max-width:520px){
+  .rightCol{ flex:0 0 220px; }
+  .gauge{ max-height:190px; }
+  .pointer{ left:calc(100% - 110px); height:70px; }
+}
 
 /* numbers */
 .bmiValueWrap{display:flex;align-items:baseline;gap:8px}
 .bmiNumber{font-weight:900;font-size:44px;color:var(--deep);line-height:1;margin:0}
 @media(max-width:520px){ .bmiNumber{font-size:36px} }
 .bmiUnit{font-size:16px;color:var(--muted)}
-.category{font-size:20px;font-weight:800;margin-top:8px;color:var(--danger)} /* default red */
+.category{font-size:20px;font-weight:800;margin-top:8px;color:var(--danger)}
 .dateStamp{color:var(--muted);font-size:13px;margin-top:6px}
 
 /* legend */
@@ -79,11 +120,11 @@ label{font-size:13px;color:#0b1720;margin-bottom:6px;display:block}
 .interp{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding:10px;border-radius:10px;background:#fff;border:1px solid var(--border)}
 .interp .text{font-weight:800}
 
-/* gauge pointer */
-.gaugeWrap{padding:10px 6px 22px} /* prevents clipping */
-.gauge{width:100%;height:auto;display:block}
-.pointer{position:absolute;left:calc(100% - 140px);bottom:26px;width:9px;height:96px;background:#0f1720;border-radius:12px;transform-origin:bottom center;box-shadow:0 12px 22px rgba(0,0,0,0.14)}
-@media(max-width:520px){ .pointer{left:calc(100% - 120px);height:78px} }
+/* text and ticks */
+.gauge text { font-family: Inter, system-ui, sans-serif; font-weight:600; fill:#1a3a3a; }
+@media (max-width:520px){
+  .gauge text { font-size:10px !important; }
+}
 
 /* ensure card corners show on mobile and remove extra white bands */
 .card, .container {overflow:visible}
@@ -299,18 +340,20 @@ tabs.other.addEventListener('click', ()=> setMode('other'));
 // SVG / gauge helpers
 function polar(cx,cy,r,deg){ const rad = (deg - 90) * Math.PI/180; return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) }; }
 function arcPath(cx,cy,r,startDeg,endDeg){
-  // ensure angles within -90 .. 90 (we map 0..60 -> -90..90)
-  const s = startDeg, e = endDeg;
-  const p1 = polar(cx,cy,r,e);
-  const p2 = polar(cx,cy,r,s);
+  const p1 = polar(cx,cy,r,endDeg);
+  const p2 = polar(cx,cy,r,startDeg);
   const large = (endDeg - startDeg) <= 180 ? 0 : 1;
   return `M ${p1.x} ${p1.y} A ${r} ${r} 0 ${large} 0 ${p2.x} ${p2.y}`;
 }
 
-// draw segments based on BMI ranges
+// format tick labels cleanly
+function formatTickValue(v){
+  return Number.isInteger(v) ? String(v) : v.toFixed(1);
+}
+
+// draw segments and ticks (patched for clean labels & no overlap)
 function drawSegmentsAndTicks(){
-  const cx = 210, cy = 180, r = 130; // match viewBox (420x220), center lower for semi circle
-  // segments: 0-18.5, 18.5-24.9, 25-29.9, 30-34.9, 35-39.9, 40-60
+  const cx = 210, cy = 180, r = 130; // viewBox coordinates
   const ranges = [
     {from:0,to:18.5},
     {from:18.5,to:24.9},
@@ -325,29 +368,35 @@ function drawSegmentsAndTicks(){
     segEls[i].setAttribute('d', arcPath(cx,cy,r,sdeg,edeg));
   });
 
-  // ticks and labels (0,10,15,18.5,20,25,30,35,40,50,60)
   tickGroup.innerHTML = '';
   const marks = [0,10,15,18.5,20,25,30,35,40,50,60];
   marks.forEach(v=>{
     const deg = mapBMItoDeg(v);
     const out = polar(cx,cy,r+18,deg);
     const inn = polar(cx,cy,r-12,deg);
-    // line
+
     const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
     ln.setAttribute('x1',out.x); ln.setAttribute('y1',out.y); ln.setAttribute('x2',inn.x); ln.setAttribute('y2',inn.y);
     ln.setAttribute('stroke','rgba(2,6,23,0.06)'); ln.setAttribute('stroke-width',2);
+    ln.setAttribute('shape-rendering','geometricPrecision');
     tickGroup.appendChild(ln);
-    // label (avoid overlapping on 18.5 by slightly offsetting)
-    const lab = polar(cx,cy,r+36,deg);
+
+    const labelRadius = r + 36;
+    const labelPos = polar(cx, cy, labelRadius, deg);
     const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x',lab.x); t.setAttribute('y',lab.y + (v===18.5?6:4));
-    t.setAttribute('text-anchor','middle'); t.setAttribute('font-size',11); t.setAttribute('fill','#12343a'); t.setAttribute('font-weight','600');
-    t.textContent = String(v);
+    t.setAttribute('x', labelPos.x);
+    const yNudge = (v === 18.5) ? 8 : 4;
+    t.setAttribute('y', labelPos.y + yNudge);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('font-size', 11);
+    t.setAttribute('fill', '#12343a');
+    t.setAttribute('font-weight','600');
+    t.textContent = formatTickValue(v);
     tickGroup.appendChild(t);
   });
 }
 
-function mapBMItoDeg(bmi){ // maps 0..60 -> -90..90
+function mapBMItoDeg(bmi){
   const v = Math.max(0, Math.min(bmi,60));
   return (v/60)*180 - 90;
 }
@@ -371,7 +420,6 @@ function categoryFor(bmi){
 
 // render helpers
 function renderResultDisplay(bmi, kg, m){
-  // format
   bmiNumber.textContent = bmi.toFixed(2);
   const cat = categoryFor(bmi);
   bmiCategory.textContent = cat.name;
@@ -380,7 +428,7 @@ function renderResultDisplay(bmi, kg, m){
   interpretation.textContent = cat.note;
 
   const bmiPrime = bmi / 25;
-  const ponderal = kg / (m*m*m); // kg / m^3
+  const ponderal = kg / (m*m*m);
   bmiPrimeEl.textContent = bmiPrime.toFixed(2);
   ponderalEl.textContent = `${ponderal.toFixed(2)} kg/m³`;
 
@@ -388,9 +436,7 @@ function renderResultDisplay(bmi, kg, m){
   const high = 24.9 * m * m;
   healthyRangeEl.textContent = `${low.toFixed(1)} kg — ${high.toFixed(1)} kg`;
 
-  // rotate needle
-  const ang = mapBMItoDeg(bmi);
-  needle.style.transition = 'transform 700ms cubic-bezier(.2,.9,.2,1)';
+  const ang = Math.round(mapBMItoDeg(bmi) * 100) / 100;
   needle.style.transform = `translateX(-50%) rotate(${ang}deg)`;
 }
 
@@ -405,7 +451,7 @@ function calculate(){
     kg = lbToKg(impW.value); m = ftInToM(impFt.value, impIn.value);
     if(!(kg>0)) return alert('Please enter weight (lb).');
     if(!(m>0)) return alert('Please enter height in ft and inches.');
-  } else { // other (metric-style meters)
+  } else {
     kg = Number(othW.value); m = Number(othH.value);
     if(!(kg>0)) return alert('Please enter weight (kg).');
     if(!(m>0)) return alert('Please enter height in meters.');
@@ -445,7 +491,7 @@ btnSave.addEventListener('click', ()=>{
 // PNG export
 btnPNG.addEventListener('click', ()=>{
   html2canvas($('#resultCard'), { scale: 2, backgroundColor: null }).then(canvas=>{
-   const url = canvas.toDataURL('image/png');
+    const url = canvas.toDataURL('image/png');
     const a = document.createElement('a'); a.href = url; a.download = 'bmi_result.png'; document.body.appendChild(a); a.click(); a.remove();
   }).catch(()=> alert('PNG export failed.'));
 });
@@ -474,9 +520,11 @@ btnCalc.addEventListener('click', calculate);
 needle.style.transform = 'translateX(-50%) rotate(-90deg)';
 setMode('metric');
 
-// ensure no horizontal scroll due to svg or margins
-window.addEventListener('resize', ()=> {
-  // nothing heavy: preserves layout; when embedded cross-origin, iframe will handle height externally
+// resize handler: redraw ticks if viewport changes (keeps labels crisp)
+let redrawTimeout = null;
+window.addEventListener('resize', ()=>{
+  if(redrawTimeout) clearTimeout(redrawTimeout);
+  redrawTimeout = setTimeout(()=>{ drawSegmentsAndTicks(); }, 220);
 });
 </script>
 </body>
