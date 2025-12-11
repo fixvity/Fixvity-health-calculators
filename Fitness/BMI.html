@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Ultimate BMI Calculator — Mobile fixes</title>
+<title>Ultimate BMI Calculator — Final</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
 :root{
   --bg:#f4f8fb; --card:#ffffff; --accent:#0b7285; --muted:#6b7176;
   --border:rgba(18,24,30,0.08); --danger:#ef4444; --ok:#10b981; --warn:#f59e0b; --deep:#08323a;
-  --gauge-max-h:260px;
+  --gauge-max-h:320px;
   font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
 }
 *{box-sizing:border-box}
@@ -18,7 +18,7 @@ html,body{height:100%;margin:0;background:var(--bg);-webkit-font-smoothing:antia
 .container{max-width:980px;margin:16px auto;padding:12px}
 .card{background:var(--card);border-radius:16px;padding:12px;box-shadow:0 18px 36px rgba(12,18,24,0.06);overflow:visible}
 .header{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 6px 10px}
-.title{font-size:24px;margin:0;font-weight:800}
+.title{font-size:28px;margin:0;font-weight:800}
 .brand{color:var(--muted);font-weight:600;font-size:13px}
 
 /* grid */
@@ -48,52 +48,21 @@ label{font-size:13px;color:#0b1720;margin-bottom:6px;display:block}
 .svgWrap{width:100%;display:flex;justify-content:center;align-items:center;padding:4px 8px 0;box-sizing:border-box}
 svg.gauge{width:100%;height:auto;max-height:var(--gauge-max-h);display:block}
 
-/* needle wrapper */
-.needleWrap{position:relative;width:100%;max-width:760px;height:0;margin-top:-6px;display:flex;justify-content:center;}
-.needle{width:8px;border-radius:6px;background:#08151a;box-shadow:0 8px 12px rgba(0,0,0,0.12);transform-origin:center 92%;height:88px;transition:transform 700ms cubic-bezier(.18,.8,.24,1)}
-/* mobile needle adjustments */
-@media(max-width:420px){
-  .needle{height:60px;width:8px; transform-origin:center 88%;}
-  .needle{ /* initial offset to avoid number overlap */
-    transform: translateX(22px) rotate(-90deg);
-  }
-}
-
-/* precise arrowhead styling (absolute but appended to needleWrap) */
-#arrowHead {
-  position: absolute;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-  transform-origin: 50% 90%;
-  z-index: 6;
-  border-left: 14px solid transparent;
-  border-right: 14px solid transparent;
-  border-bottom: 22px solid #08151a;
-  filter: drop-shadow(0 6px 8px rgba(0,0,0,0.12));
-}
-@media (max-width:480px){
-  #arrowHead{
-    border-left: 9px solid transparent;
-    border-right: 9px solid transparent;
-    border-bottom: 14px solid #08151a;
-  }
-  .needle{height:54px !important; width:7px !important;}
-}
+/* needle wrapper: we rotate the svg <line> element; height/visual handled within SVG */
+.needle{transition:transform 700ms cubic-bezier(.18,.8,.24,1)}
 
 /* result top */
 .resultTop{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;width:100%}
 .leftCol{flex:1}
 .bmiNumber{font-weight:900;font-size:48px;color:var(--deep);margin:0;line-height:0.95}
 .unit{font-size:16px;color:var(--muted);margin-left:6px}
-.category{font-size:18px;font-weight:800;margin-top:6px;color:var(--danger)}
+.category{font-size:20px;font-weight:800;margin-top:6px;color:var(--danger)}
 .dateStamp{color:var(--muted);font-size:12px;margin-top:6px}
 
 /* mobile font reductions so number no longer collides */
 @media(max-width:520px){
-  .bmiNumber{font-size:36px}
+  .bmiNumber{font-size:40px}
   .unit{font-size:14px}
-  .resultTop{margin-top:-8px}
 }
 
 /* details */
@@ -107,6 +76,12 @@ svg.gauge{width:100%;height:auto;max-height:var(--gauge-max-h);display:block}
 .muted{color:var(--muted)}
 .center{display:flex;align-items:center;justify-content:center}
 .hidden{display:none}
+
+/* small visual spacing fix so svg arc sits higher on small screens */
+@media(max-width:420px){
+  .svgWrap{padding-top:2px}
+  :root{--gauge-max-h:300px}
+}
 </style>
 </head>
 <body>
@@ -126,7 +101,7 @@ svg.gauge{width:100%;height:auto;max-height:var(--gauge-max-h);display:block}
           <button id="tabOther" class="tab">Other</button>
         </div>
 
-        <div class="row2" style="align-items:start;">
+        <div class="row2">
           <div>
             <label for="age">Age (years)</label>
             <input id="age" class="input" type="number" min="2" max="120" placeholder="25" />
@@ -196,21 +171,31 @@ svg.gauge{width:100%;height:auto;max-height:var(--gauge-max-h);display:block}
       <aside class="results" id="resultCard" aria-live="polite">
         <div class="gaugeFull">
           <div class="svgWrap" aria-hidden="false">
-            <svg class="gauge" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet" role="img" aria-label="BMI gauge">
-              <path d="M80 360 A320 320 0 0 1 820 360" stroke="rgba(2,6,23,0.06)" stroke-width="48" fill="none" stroke-linecap="round"></path>
-              <path id="seg0" stroke="#ef4444" stroke-width="48" fill="none" stroke-linecap="butt"></path>
-              <path id="seg1" stroke="#10b981" stroke-width="48" fill="none" stroke-linecap="butt"></path>
-              <path id="seg2" stroke="#f59e0b" stroke-width="48" fill="none" stroke-linecap="butt"></path>
-              <path id="seg3" stroke="#ff8c42" stroke-width="48" fill="none" stroke-linecap="butt"></path>
-              <path id="seg4" stroke="#e74c3c" stroke-width="48" fill="none" stroke-linecap="butt"></path>
-              <path id="seg5" stroke="#812525" stroke-width="48" fill="none" stroke-linecap="butt"></path>
-              <g id="tickGroup"></g>
-            </svg>
-          </div>
+            <!-- Improved semicircle gauge (full top arc, larger ticks, needle). -->
+            <svg id="bmiGauge" class="gauge" viewBox="0 0 900 500" preserveAspectRatio="xMidYMid meet" role="img" aria-label="BMI gauge">
+              <!-- background semicircle (soft) -->
+              <path d="M80 420 A370 370 0 0 1 820 420"
+                    stroke="rgba(0,0,0,0.06)" stroke-width="60"
+                    fill="none" stroke-linecap="round"/>
+              <!-- colored segments (paths will be set by JS) -->
+              <path id="seg0" stroke="#ef4444" stroke-width="60" fill="none" stroke-linecap="butt"/>
+              <path id="seg1" stroke="#10b981" stroke-width="60" fill="none" stroke-linecap="butt"/>
+              <path id="seg2" stroke="#f59e0b" stroke-width="60" fill="none" stroke-linecap="butt"/>
+              <path id="seg3" stroke="#ff8c42" stroke-width="60" fill="none" stroke-linecap="butt"/>
+              <path id="seg4" stroke="#e74c3c" stroke-width="60" fill="none" stroke-linecap="butt"/>
+              <path id="seg5" stroke="#812525" stroke-width="60" fill="none" stroke-linecap="butt"/>
 
-          <div class="needleWrap" aria-hidden="true">
-            <div id="needle" class="needle" style="transform:rotate(-90deg)"></div>
-            <!-- arrow head will be appended here by script -->
+              <!-- ticks & numbers (generated by JS) -->
+              <g id="ticks"></g>
+
+              <!-- needle: a long line rotated around bottom center; JS rotates it -->
+              <line id="needleLine" x1="450" y1="420" x2="450" y2="190"
+                    stroke="#08151a" stroke-width="12" stroke-linecap="round"
+                    transform="rotate(-90 450 420)" />
+
+              <!-- center knob -->
+              <circle cx="450" cy="420" r="14" fill="#0b1720"/>
+            </svg>
           </div>
 
           <div class="resultTop" style="margin-top:-6px">
@@ -220,7 +205,7 @@ svg.gauge{width:100%;height:auto;max-height:var(--gauge-max-h);display:block}
                   <div id="bmiNumber" class="bmiNumber">—</div>
                   <div class="unit">kg/m²</div>
                 </div>
-                <div style="min-width:80px">
+                <div style="min-width:120px">
                   <div id="bmiCategory" class="category muted">Enter values & calculate</div>
                   <div id="lastTime" class="dateStamp">Last: —</div>
                 </div>
@@ -266,11 +251,8 @@ svg.gauge{width:100%;height:auto;max-height:var(--gauge-max-h);display:block}
 </div>
 
 <script>
-/* Focused full script: switching, gauge draw, precise arrow placement, calculation and controls */
-/* Utility */
+/* Full final JS: mode switching, gauge draw (full semicircle), calculate, save & PNG */
 const $ = s => document.querySelector(s);
-
-/* Elements */
 const tabs = { metric: $('#tabMetric'), imperial: $('#tabImperial'), other: $('#tabOther') };
 const metricW = $('#weightKg'), metricH = $('#heightCm');
 const impW = $('#weightLb'), impFt = $('#heightFt'), impIn = $('#heightIn');
@@ -280,14 +262,12 @@ const btnCalc = $('#btnCalc'), btnClear = $('#btnClear'), btnSave = $('#btnSave'
 const bmiNumber = $('#bmiNumber'), bmiCategory = $('#bmiCategory'), lastTime = $('#lastTime');
 const bmiPrimeEl = $('#bmiPrime'), ponderalEl = $('#ponderal'), healthyRangeEl = $('#healthyRange');
 const interpretation = $('#interpretation');
-const needle = $('#needle');
+const needleLine = $('#needleLine');
 const segEls = [$('#seg0'),$('#seg1'),$('#seg2'),$('#seg3'),$('#seg4'),$('#seg5')];
-const tickGroup = $('#tickGroup');
-const svg = document.querySelector('svg.gauge');
+const tickGroup = $('#ticks');
 
 let mode = 'metric', lastResult = null;
 
-/* Mode switching */
 function setMode(m){
   mode = m;
   Object.values(tabs).forEach(t=>t.classList.remove('active'));
@@ -304,49 +284,61 @@ tabs.imperial.addEventListener('click', ()=>setMode('imperial'));
 tabs.other.addEventListener('click', ()=>setMode('other'));
 setMode('metric');
 
-/* geometry helpers (same as base) */
-function polar(cx,cy,r,deg){ const rad=(deg-90)*Math.PI/180; return {x:cx + r*Math.cos(rad), y:cy + r*Math.sin(rad)}; }
-function arcPath(cx,cy,r,startDeg,endDeg){ const p1=polar(cx,cy,r,endDeg); const p2=polar(cx,cy,r,startDeg); const large=(endDeg-startDeg)<=180?0:1; return `M ${p1.x} ${p1.y} A ${r} ${r} 0 ${large} 0 ${p2.x} ${p2.y}`; }
-function mapBMItoDeg(bmi){ const v=Math.max(0,Math.min(bmi,60)); return (v/60)*180 - 90; }
+/* gauge geometry utils */
+const CX = 450, CY = 420, R = 370;
+function polarXY(deg, radius=R){ const rad=(deg-90)*Math.PI/180; return { x: CX + radius*Math.cos(rad), y: CY + radius*Math.sin(rad) }; }
+function arcPathForDeg(startDeg, endDeg){
+  const p1 = polarXY(endDeg);
+  const p2 = polarXY(startDeg);
+  return `M ${p1.x} ${p1.y} A ${R} ${R} 0 0 0 ${p2.x} ${p2.y}`;
+}
+function bmiToDeg(bmi){
+  const v = Math.max(0, Math.min(bmi,60));
+  return (v/60)*180 - 90;
+}
 
-/* Draw the colored segments and numbers ticks - uses same geometry as before */
+/* draw colored segments and big ticks */
 function drawGauge(){
-  const cx=450, cy=360, r=320;
-  const ranges=[
-    {from:0,to:18.5},{from:18.5,to:24.9},{from:25,to:29.9},
-    {from:30,to:34.9},{from:35,to:39.9},{from:40,to:60}
+  const ranges = [
+    [0,18.5],[18.5,24.9],[25,29.9],[30,34.9],[35,39.9],[40,60]
   ];
   ranges.forEach((rg,i)=>{
-    const sdeg = mapBMItoDeg(rg.from);
-    const edeg = mapBMItoDeg(Math.min(rg.to,60));
-    segEls[i].setAttribute('d', arcPath(cx,cy,r,sdeg,edeg));
+    const s = bmiToDeg(rg[0]), e = bmiToDeg(Math.min(rg[1],60));
+    segEls[i].setAttribute('d', arcPathForDeg(s,e));
   });
 
+  // ticks & big numbers
   tickGroup.innerHTML='';
-  const marks = [0,10,15,20,25,30,35,40,50,60];
-  marks.forEach(v=>{
-    const deg=mapBMItoDeg(v);
-    const out=polar(cx,cy,r+36,deg);
-    const inn=polar(cx,cy,r-18,deg);
-    const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
-    ln.setAttribute('x1',out.x); ln.setAttribute('y1',out.y);
-    ln.setAttribute('x2',inn.x); ln.setAttribute('y2',inn.y);
-    ln.setAttribute('stroke','rgba(2,6,23,0.06)'); ln.setAttribute('stroke-width',3);
+  const numbers = [0,10,15,20,25,30,35,40,50,60];
+  numbers.forEach(v=>{
+    const deg = bmiToDeg(v);
+    const pOuter = polarXY(deg, R+36);
+    const pInner = polarXY(deg, R-18);
+
+    // tick line
+    const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+    ln.setAttribute('x1', pOuter.x); ln.setAttribute('y1', pOuter.y);
+    ln.setAttribute('x2', pInner.x); ln.setAttribute('y2', pInner.y);
+    ln.setAttribute('stroke', 'rgba(2,6,23,0.06)'); ln.setAttribute('stroke-width', 3);
     tickGroup.appendChild(ln);
-    const labelPos = polar(cx,cy,r+64,deg);
-    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x',labelPos.x); t.setAttribute('y',labelPos.y+6);
-    t.setAttribute('text-anchor','middle'); t.setAttribute('font-size',14);
-    t.setAttribute('fill','#12343a'); t.setAttribute('font-weight',700);
-    t.textContent = (Number.isInteger(v) ? String(v) : v.toFixed(1));
-    tickGroup.appendChild(t);
+
+    // number
+    const labelPos = polarXY(deg, R+64);
+    const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+    txt.setAttribute('x', labelPos.x); txt.setAttribute('y', labelPos.y+8);
+    txt.setAttribute('text-anchor', 'middle');
+    txt.setAttribute('font-size', 28); // slightly big
+    txt.setAttribute('font-weight', 800);
+    txt.setAttribute('fill', '#0b1720');
+    txt.textContent = v;
+    tickGroup.appendChild(txt);
   });
 }
 drawGauge();
 
 /* conversions */
-function cmToM(cm){ const c=Number(cm); return c>0 ? c/100 : null; }
-function ftInToM(ft,inch){ const f=Number(ft)||0; const i=Number(inch)||0; const tot = f*12 + i; return tot>0 ? tot*0.0254 : null; }
+function cmToM(cm){ cm = Number(cm); return (cm>0) ? cm/100 : null; }
+function ftInToM(ft,inch){ const f=Number(ft)||0; const i=Number(inch)||0; const tot=f*12+i; return tot>0 ? tot*0.0254 : null; }
 function lbToKg(lb){ const l=Number(lb); return l>0 ? l*0.45359237 : null; }
 
 function categoryFor(bmi){
@@ -359,78 +351,7 @@ function categoryFor(bmi){
   return {name:'Obesity III', color:'#812525', note:'Severe obesity.'};
 }
 
-/* Helper: convert SVG coords to screen coords (preserveAspectRatio xMidYMid meet) */
-function svgToScreen(svgEl, svgX, svgY){
-  const rect = svgEl.getBoundingClientRect();
-  const vb = svgEl.viewBox.baseVal;
-  const scaleX = rect.width / vb.width;
-  const scaleY = rect.height / vb.height;
-  const usedScale = Math.min(scaleX, scaleY);
-  const extraX = rect.width - vb.width * usedScale;
-  const extraY = rect.height - vb.height * usedScale;
-  const offsetX = rect.left + (extraX / 2);
-  const offsetY = rect.top + (extraY / 2);
-  const screenX = offsetX + (svgX - vb.x) * usedScale;
-  const screenY = offsetY + (svgY - vb.y) * usedScale;
-  return {x: screenX, y: screenY, scale: usedScale};
-}
-
-/* Create arrow element inside needleWrap if not exists */
-function ensureArrow(){
-  const wrap = document.querySelector('.needleWrap');
-  let arrow = document.getElementById('arrowHead');
-  if(!arrow){
-    arrow = document.createElement('div');
-    arrow.id = 'arrowHead';
-    wrap.appendChild(arrow);
-  }
-  return arrow;
-}
-
-/* Place arrow precisely on the inner arc and match needle rotation.
-   Uses same cx,cy,r as drawGauge() */
-function placeArrowForBMI(bmi){
-  const arrow = ensureArrow();
-  const CX = 450, CY = 360, R = 320;
-  const innerArcRadius = R - 24; // sits slightly inside the stroke center
-  const v = Math.max(0, Math.min(bmi, 60));
-  const deg = (v/60)*180 - 90;
-  const rad = (deg - 90) * Math.PI / 180;
-
-  // arrow tip (svg coords)
-  const tipX = CX + innerArcRadius * Math.cos(rad);
-  const tipY = CY + innerArcRadius * Math.sin(rad);
-
-  // needle end point slightly shorter so needle + arrow align visually
-  const needleLenSVG = innerArcRadius - 32;
-  const needleEndX = CX + needleLenSVG * Math.cos(rad);
-  const needleEndY = CY + needleLenSVG * Math.sin(rad);
-
-  // map to screen
-  const tipScreen = svgToScreen(svg, tipX, tipY);
-  const needleEndScreen = svgToScreen(svg, needleEndX, needleEndY);
-
-  // place arrow DOM element so its bottom center aligns to tipScreen
-  const arrowBorderBottom = parseFloat(getComputedStyle(arrow).borderBottomWidth) || 22;
-  const arrowW = (parseFloat(getComputedStyle(arrow).borderLeftWidth) || 14) + (parseFloat(getComputedStyle(arrow).borderLeftWidth) || 14) + (parseFloat(getComputedStyle(arrow).borderRightWidth) || 14);
-
-  // calculate offset within needleWrap: needleWrap is centered relative to svg; arrow is positioned absolutely within needleWrap,
-  // but easiest: position arrow using viewport coordinates (left/top) so it visually sits on screen
-  // (needleWrap uses relative positioning inside page, so set style.left/top absolute)
-  arrow.style.left = (tipScreen.x - (arrowW/2)) + 'px';
-  arrow.style.top = (tipScreen.y - arrowBorderBottom) + 'px';
-
-  // rotate arrow so its point faces outward along radial => default arrow points down, so rotate by deg+90
-  const rotation = deg + 90;
-  arrow.style.transform = `rotate(${rotation}deg)`;
-
-  // rotate needle to match angle. Use slight translate on small screens to avoid overlapping the big number
-  const baseTranslate = (window.innerWidth <= 420) ? 22 : 0;
-  needle.style.transform = `translateX(${baseTranslate}px) rotate(${deg}deg)`;
-}
-
-/* render results and call arrow placement */
-function renderResult(bmi,kg,m){
+function renderResult(bmi, kg, m){
   bmiNumber.textContent = bmi.toFixed(2);
   const cat = categoryFor(bmi);
   bmiCategory.textContent = cat.name;
@@ -446,11 +367,16 @@ function renderResult(bmi,kg,m){
   const low = 18.5 * m * m, high = 24.9 * m * m;
   healthyRangeEl.textContent = `${low.toFixed(1)} kg — ${high.toFixed(1)} kg`;
 
-  // needle rotation and precise arrow placement
-  placeArrowForBMI(bmi);
+  moveNeedle(bmi);
 }
 
-/* Calculation logic */
+function moveNeedle(bmi){
+  const angle = bmiToDeg(bmi);
+  // rotate around center CX,CY
+  needleLine.setAttribute('transform', `rotate(${angle} ${CX} ${CY})`);
+}
+
+/* calculation flow */
 function calculate(){
   let kg=null, m=null;
   if(mode==='metric'){
@@ -466,6 +392,7 @@ function calculate(){
     if(!(kg>0)){ alert('Enter weight (kg).'); return; }
     if(!(m>0)){ alert('Enter height (m).'); return; }
   }
+
   const bmi = kg / (m*m);
   if(!Number.isFinite(bmi)){ alert('Calculation error.'); return; }
   lastResult = {ts:new Date().toISOString(), bmi:Number(bmi.toFixed(3)), kg:Number(kg.toFixed(3)), m:Number(m.toFixed(4)), mode};
@@ -483,22 +410,29 @@ btnClear.addEventListener('click', ()=>{
   bmiPrimeEl.textContent='—';
   ponderalEl.textContent='—';
   healthyRangeEl.textContent='—';
-  needle.style.transform = (window.innerWidth <= 420) ? 'translateX(22px) rotate(-90deg)' : 'rotate(-90deg)';
-  // hide arrow by moving it off-screen
-  const arrow = document.getElementById('arrowHead'); if(arrow) arrow.style.left='-9999px';
+  needleLine.setAttribute('transform', `rotate(-90 ${CX} ${CY})`);
   lastResult = null;
 });
 
 btnCalc.addEventListener('click', calculate);
+
 btnSave.addEventListener('click', ()=>{
   if(!lastResult){ alert('Calculate first.'); return; }
-  const key='fixvity_bmi_history'; const arr=JSON.parse(localStorage.getItem(key)||'[]'); arr.unshift(lastResult); if(arr.length>200) arr.length=200; localStorage.setItem(key, JSON.stringify(arr)); alert('Saved to local storage.');
+  const key='fixvity_bmi_history';
+  const arr = JSON.parse(localStorage.getItem(key)||'[]');
+  arr.unshift(lastResult);
+  if(arr.length>200) arr.length = 200;
+  localStorage.setItem(key, JSON.stringify(arr));
+  alert('Saved to local storage.');
 });
+
 btnPNG.addEventListener('click', ()=>{
-  html2canvas($('#resultCard'), { scale: 2, backgroundColor: null }).then(canvas=>{
-    const url=canvas.toDataURL('image/png'); const a=document.createElement('a'); a.href=url; a.download='bmi_result.png'; document.body.appendChild(a); a.click(); a.remove();
+  html2canvas($('#resultCard'), { scale:2, backgroundColor:null }).then(canvas=>{
+    const url = canvas.toDataURL('image/png');
+    const a = document.createElement('a'); a.href = url; a.download = 'bmi_result.png'; document.body.appendChild(a); a.click(); a.remove();
   }).catch(()=>alert('PNG export failed.'));
 });
+
 btnCopy.addEventListener('click', ()=>{
   if(!lastResult){ alert('No result.'); return; }
   const txt = `BMI ${lastResult.bmi} kg/m² • weight ${lastResult.kg} kg • height ${lastResult.m} m • ${lastResult.mode}`;
@@ -506,14 +440,14 @@ btnCopy.addEventListener('click', ()=>{
   else prompt('Copy:', txt);
 });
 
-/* Enter key quick calc */
+/* Enter key triggers calc for inputs */
 ['weightKg','heightCm','weightLb','heightFt','heightIn','weightOther','heightM'].forEach(id=>{
   const el=document.getElementById(id); if(el) el.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); calculate(); }});
 });
 
-/* redraw ticks and reposition arrow on resize */
-let rt=null;
-window.addEventListener('resize', ()=>{ if(rt) clearTimeout(rt); rt=setTimeout(()=>{ drawGauge(); if(!lastResult){ needle.style.transform = (window.innerWidth<=420) ? 'translateX(22px) rotate(-90deg)' : 'rotate(-90deg)'; const arrow = document.getElementById('arrowHead'); if(arrow) arrow.style.left='-9999px'; } else { renderResult(lastResult.bmi,lastResult.kg,lastResult.m); } },150); });
+/* responsive redraw */
+let rt = null;
+window.addEventListener('resize', ()=>{ if(rt) clearTimeout(rt); rt=setTimeout(()=>{ drawGauge(); if(lastResult) moveNeedle(lastResult.bmi); else needleLine.setAttribute('transform', `rotate(-90 ${CX} ${CY})`); },150); });
 
 </script>
 </body>
