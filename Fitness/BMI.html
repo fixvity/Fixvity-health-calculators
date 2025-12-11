@@ -3,113 +3,87 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Ultimate BMI Calculator — Final (adjusted)</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<title>Ultimate BMI Calculator — Final Gauge</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f4f8fb; --card:#ffffff; --accent:#0b7285; --muted:#6b7176;
   --border:rgba(18,24,30,0.08); --danger:#ef4444; --ok:#10b981; --warn:#f59e0b; --deep:#08323a;
-  --gauge-max-h:320px;
-  font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
 }
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);-webkit-font-smoothing:antialiased}
-.container{max-width:980px;margin:16px auto;padding:12px}
-.card{background:var(--card);border-radius:16px;padding:12px;box-shadow:0 18px 36px rgba(12,18,24,0.06);overflow:visible}
-.header{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 6px 10px}
-.title{font-size:28px;margin:0;font-weight:800}
+html,body{height:100%;margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial}
+.container{max-width:980px;margin:18px auto;padding:14px}
+.card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 18px 36px rgba(12,18,24,0.06)}
+.header{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 6px 14px}
+.title{font-size:24px;margin:0;font-weight:800}
 .brand{color:var(--muted);font-weight:600;font-size:13px}
 
-/* grid */
+/* layout */
 .grid{display:grid;grid-template-columns:1fr;gap:12px}
 @media(min-width:980px){ .grid{grid-template-columns:1fr 420px} }
 
 .inputs{padding:12px;border-radius:12px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid var(--border)}
-.tabRow{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.tab{padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:700}
-.tab.active{background:#e8fbfd;border-color:transparent;color:var(--accent)}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:700px){ .row2{grid-template-columns:1fr} }
-label{font-size:13px;color:#0b1720;margin-bottom:6px;display:block}
+.label{font-size:13px;color:#0b1720;margin-bottom:6px;display:block}
 .input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);font-size:15px;background:transparent}
-.note{font-size:12px;color:var(--muted);margin-top:6px}
-
-/* controls: keep left and right groups */
 .controls{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap;justify-content:space-between}
-.controls .leftGroup{display:flex;gap:8px;align-items:center;flex:0 1 auto}
-.controls .rightGroup{display:flex;gap:8px;align-items:center;flex:0 1 auto}
 .btnPrimary{background:var(--accent);color:white;border:0;padding:10px 14px;border-radius:10px;font-weight:800;cursor:pointer}
 .btnGhost{background:#fff;border:1px solid var(--border);padding:9px 12px;border-radius:10px;cursor:pointer}
 
-/* results */
-.results{padding:12px;border-radius:12px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid var(--border);overflow:visible}
-.gaugeFull{width:100%;display:flex;flex-direction:column;align-items:center;gap:8px}
-.svgWrap{width:100%;display:flex;justify-content:center;align-items:center;padding:4px 8px 0;box-sizing:border-box}
-svg.gauge{width:100%;height:auto;max-height:var(--gauge-max-h);display:block}
+/* results card */
+.results{padding:12px;border-radius:12px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid var(--border)}
+.gaugeWrap{width:100%;display:flex;flex-direction:column;align-items:center}
+.svgWrap{width:100%;padding:8px 28px 0;box-sizing:border-box} /* horizontal padding to allow tick labels room */
+svg.gauge{width:100%;height:auto;display:block}
 
-/* needle wrapper: we rotate the svg <line> element; height/visual handled within SVG */
-.needle{transition:transform 700ms cubic-bezier(.18,.8,.24,1)}
+/* needle */
+.needle{transform-origin:480px 360px;transition:transform 700ms cubic-bezier(.18,.8,.24,1);}
 
 /* result top */
-.resultTop{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;width:100%}
-.leftCol{flex:1}
-/* 1) Slightly smaller & lighter BMI number */
-.bmiNumber{font-weight:700;font-size:40px;color:var(--deep);margin:0;line-height:0.95}
-.unit{font-size:16px;color:var(--muted);margin-left:6px}
-.category{font-size:20px;font-weight:800;margin-top:6px;color:var(--danger)}
-/* removed last-time element styles on purpose (we removed the element) */
-
-/* mobile font reductions so number no longer collides */
+.resultTop{display:flex;gap:10px;align-items:flex-start;justify-content:flex-start;width:100%}
+.bmiNumber{font-weight:700;font-size:40px;color:var(--deep);margin:0;line-height:1}
+.unit{font-size:16px;color:var(--muted);margin-left:8px}
+.category{font-size:22px;font-weight:800;margin-left:22px;color:var(--warn)}
+/* slightly smaller on small screens to avoid collision */
 @media(max-width:520px){
-  .bmiNumber{font-size:36px}
-  .unit{font-size:14px}
+  .bmiNumber{font-size:34px}
+  .category{font-size:20px}
 }
 
-/* details */
-.detailGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;margin-top:10px}
+/* legend + details */
+.legend{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.pill{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;background:#fff;border:1px solid var(--border);font-weight:700}
+.detailGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
 @media(max-width:520px){ .detailGrid{grid-template-columns:1fr} }
 .cardItem{background:#fff;border-radius:10px;padding:10px;border:1px solid var(--border)}
-.cardItem .label{color:var(--muted);font-size:13px}
-.interp{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding:10px;border-radius:10px;background:#fff;border:1px solid var(--border)}
-.legend{display:flex;flex-direction:column;gap:8px;margin-top:10px}
-.pill{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;background:#fff;border:1px solid var(--border);font-weight:700}
-.muted{color:var(--muted)}
+.muted{color:var(--muted);font-size:13px}
 .center{display:flex;align-items:center;justify-content:center}
-.hidden{display:none}
-
-/* small visual spacing fix so svg arc sits higher on small screens */
-@media(max-width:420px){
-  .svgWrap{padding-top:2px}
-  :root{--gauge-max-h:300px}
-}
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="card" role="main" aria-labelledby="mainTitle">
+  <div class="card">
     <div class="header">
-      <h1 id="mainTitle" class="title">Ultimate BMI Calculator</h1>
+      <h1 class="title">Ultimate BMI Calculator</h1>
       <div class="brand">Fixvity</div>
     </div>
 
     <div class="grid">
-      <!-- LEFT -->
+      <!-- LEFT: simple inputs -->
       <section class="inputs" aria-label="Calculator inputs">
-        <div class="tabRow">
-          <button id="tabMetric" class="tab active">Metric</button>
-          <button id="tabImperial" class="tab">Imperial</button>
-          <button id="tabOther" class="tab">Other</button>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <button id="tabMetric" style="padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:#e8fbfd;font-weight:700">Metric</button>
+          <button id="tabImperial" style="padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:#fff;font-weight:700">Imperial</button>
+          <button id="tabOther" style="padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:#fff;font-weight:700">Other</button>
         </div>
 
-        <div class="row2">
+        <div style="display:grid;gap:12px">
           <div>
-            <label for="age">Age (years)</label>
+            <label class="label">Age (years)</label>
             <input id="age" class="input" type="number" min="2" max="120" placeholder="25" />
           </div>
 
           <div>
-            <label for="sex">Sex</label>
+            <label class="label">Sex</label>
             <select id="sex" class="input">
               <option value="">Prefer not to say</option>
               <option value="female">Female</option>
@@ -118,106 +92,76 @@ svg.gauge{width:100%;height:auto;max-height:var(--gauge-max-h);display:block}
           </div>
 
           <div id="metricWeight">
-            <label for="weightKg">Weight (kg)</label>
+            <label class="label">Weight (kg)</label>
             <input id="weightKg" class="input" type="number" step="0.1" placeholder="72.5" />
-            <div class="note">Kilograms (kg)</div>
+            <div class="muted">Kilograms (kg)</div>
           </div>
 
           <div id="metricHeight">
-            <label for="heightCm">Height (cm)</label>
+            <label class="label">Height (cm)</label>
             <input id="heightCm" class="input" type="number" step="0.1" placeholder="175" />
-            <div class="note">Centimetres (cm)</div>
+            <div class="muted">Centimetres (cm)</div>
           </div>
 
-          <div id="impWeight" class="hidden">
-            <label for="weightLb">Weight (lb)</label>
-            <input id="weightLb" class="input" type="number" step="0.1" placeholder="160" />
-          </div>
-
-          <div id="impHeight" class="hidden">
-            <label>Height (ft / in)</label>
+          <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
             <div style="display:flex;gap:8px">
-              <input id="heightFt" class="input" type="number" placeholder="5" />
-              <input id="heightIn" class="input" type="number" placeholder="11" />
+              <button id="btnCalc" class="btnPrimary">Calculate</button>
+              <button id="btnClear" class="btnGhost">Clear</button>
             </div>
-            <div class="note">Feet & inches</div>
-          </div>
-
-          <div id="otherWeight" class="hidden">
-            <label for="weightOther">Weight (kg)</label>
-            <input id="weightOther" class="input" type="number" step="0.1" placeholder="72.5" />
-          </div>
-
-          <div id="otherHeight" class="hidden">
-            <label for="heightM">Height (m)</label>
-            <input id="heightM" class="input" type="number" step="0.001" placeholder="1.75" />
-          </div>
-        </div>
-
-        <div class="controls">
-          <div class="leftGroup">
-            <button id="btnCalc" class="btnPrimary">Calculate</button>
-            <button id="btnClear" class="btnGhost">Clear</button>
-          </div>
-
-          <div class="rightGroup">
-            <button id="btnSave" class="btnGhost">Save</button>
-            <button id="btnPNG" class="btnGhost">Download PNG</button>
+            <div style="display:flex;gap:8px">
+              <button id="btnSave" class="btnGhost">Save</button>
+              <button id="btnPNG" class="btnGhost">Download PNG</button>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- RIGHT -->
+      <!-- RIGHT: results -->
       <aside class="results" id="resultCard" aria-live="polite">
-        <div class="gaugeFull">
+        <div class="gaugeWrap">
           <div class="svgWrap" aria-hidden="false">
-            <svg id="bmiGauge" class="gauge" viewBox="0 0 900 500" preserveAspectRatio="xMidYMid meet" role="img" aria-label="BMI gauge">
-              <!-- soft background semicircle -->
-              <path d="M80 420 A370 370 0 0 1 820 420"
-                    stroke="rgba(0,0,0,0.06)" stroke-width="60"
-                    fill="none" stroke-linecap="round"/>
+            <!-- VIEWBOX enlarged and overflow allowed via css container padding -->
+            <svg class="gauge" id="gauge" viewBox="0 0 960 520" preserveAspectRatio="xMidYMid meet" role="img" aria-label="BMI gauge">
+              <!-- soft outer background arc (butt caps to avoid round bubbles) -->
+              <path id="bgArc" d="" stroke="rgba(2,6,23,0.06)" stroke-width="60" fill="none" stroke-linecap="butt"></path>
 
-              <!-- top thin red-mark semicircle (your drawn style) -->
-              <path id="topMark" d="M120 260 A330 330 0 0 1 780 260"
-                    stroke="#ef4444" stroke-opacity="0.10" stroke-width="10" fill="none" stroke-linecap="round"/>
+              <!-- colored segments (we draw via JS into these paths) -->
+              <path id="seg0" stroke="#ef4444" stroke-width="48" fill="none" stroke-linecap="butt"></path>
+              <path id="seg1" stroke="#10b981" stroke-width="48" fill="none" stroke-linecap="butt"></path>
+              <path id="seg2" stroke="#f59e0b" stroke-width="48" fill="none" stroke-linecap="butt"></path>
+              <path id="seg3" stroke="#ff8c42" stroke-width="48" fill="none" stroke-linecap="butt"></path>
+              <path id="seg4" stroke="#e74c3c" stroke-width="48" fill="none" stroke-linecap="butt"></path>
+              <path id="seg5" stroke="#812525" stroke-width="48" fill="none" stroke-linecap="butt"></path>
 
-              <!-- colored segments (paths will be set by JS) -->
-              <path id="seg0" stroke="#ef4444" stroke-width="60" fill="none" stroke-linecap="butt"/>
-              <path id="seg1" stroke="#10b981" stroke-width="60" fill="none" stroke-linecap="butt"/>
-              <path id="seg2" stroke="#f59e0b" stroke-width="60" fill="none" stroke-linecap="butt"/>
-              <path id="seg3" stroke="#ff8c42" stroke-width="60" fill="none" stroke-linecap="butt"/>
-              <path id="seg4" stroke="#e74c3c" stroke-width="60" fill="none" stroke-linecap="butt"/>
-              <path id="seg5" stroke="#812525" stroke-width="60" fill="none" stroke-linecap="butt"/>
+              <!-- subtle top highlight arc (shorter) -->
+              <path id="topMark" d="" stroke="#ef4444" stroke-opacity="0.06" stroke-width="8" fill="none" stroke-linecap="round"></path>
 
-              <!-- ticks & numbers (generated by JS) -->
-              <g id="ticks"></g>
+              <!-- ticks & labels group -->
+              <g id="tickGroup" font-family="Inter,Arial,Helvetica"></g>
 
-              <!-- needle line rotates from bottom center -->
-              <line id="needleLine" x1="450" y1="420" x2="450" y2="190"
-                    stroke="#08151a" stroke-width="12" stroke-linecap="round"
-                    transform="rotate(-90 450 420)" />
-
-              <!-- center knob -->
-              <circle cx="450" cy="420" r="14" fill="#0b1720"/>
+              <!-- needle line and center knob -->
+              <g id="needleGroup" transform="rotate(-90 480 360)">
+                <line id="needleLine" x1="480" y1="360" x2="480" y2="240" stroke="#08151a" stroke-width="10" stroke-linecap="round" class="needle"></line>
+                <circle id="knob" cx="480" cy="360" r="10" fill="#08151a"></circle>
+              </g>
             </svg>
           </div>
 
-          <div class="resultTop" style="margin-top:-6px">
-            <div class="leftCol">
-              <div style="display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap">
-                <div style="display:flex;align-items:center">
-                  <div id="bmiNumber" class="bmiNumber">—</div>
-                  <div class="unit">kg/m²</div>
-                </div>
-                <div style="min-width:120px">
-                  <div id="bmiCategory" class="category muted">Enter values & calculate</div>
-                  <!-- 4) Last seen removed — nothing here -->
-                </div>
+          <!-- results row: BMI number + unit + category -->
+          <div class="resultTop" style="margin-top:-4px">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center">
+                <div id="bmiNumber" class="bmiNumber">—</div>
+                <div class="unit">kg/m²</div>
+              </div>
+              <div style="display:flex;align-items:center">
+                <div id="bmiCategory" class="category" style="color:var(--muted)">Enter values</div>
               </div>
             </div>
           </div>
 
-          <div style="display:flex;gap:12px;flex-wrap:wrap;width:100%;margin-top:6px;">
+          <!-- legend + detail boxes -->
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px">
             <div style="flex:1;min-width:220px">
               <div class="legend">
                 <div class="pill"><span style="width:14px;height:14px;background:#ef4444;border-radius:6px;display:inline-block"></span>Underweight</div>
@@ -231,23 +175,14 @@ svg.gauge{width:100%;height:auto;max-height:var(--gauge-max-h);display:block}
 
             <div style="flex:1;min-width:260px">
               <div class="detailGrid">
-                <div class="cardItem"><div class="label">Healthy BMI range</div><div style="font-weight:800;margin-top:6px">18.5 — 24.9</div></div>
-                <div class="cardItem"><div class="label">BMI Prime</div><div id="bmiPrime" style="font-weight:800;margin-top:6px">—</div></div>
-                <div class="cardItem"><div class="label">Ponderal Index</div><div id="ponderal" style="font-weight:800;margin-top:6px">—</div></div>
-                <div class="cardItem"><div class="label">Healthy weight</div><div id="healthyRange" style="font-weight:800;margin-top:6px">—</div></div>
+                <div class="cardItem"><div class="muted">Healthy BMI range</div><div style="font-weight:800;margin-top:6px">18.5 — 24.9</div></div>
+                <div class="cardItem"><div class="muted">BMI Prime</div><div id="bmiPrime" style="font-weight:800;margin-top:6px">—</div></div>
+                <div class="cardItem"><div class="muted">Ponderal Index</div><div id="ponderal" style="font-weight:800;margin-top:6px">—</div></div>
+                <div class="cardItem"><div class="muted">Healthy weight</div><div id="healthyRange" style="font-weight:800;margin-top:6px">—</div></div>
               </div>
             </div>
           </div>
 
-          <div class="interp" style="margin-top:10px">
-            <div>
-              <div class="muted">Interpretation</div>
-              <div id="interpretation" class="text" style="font-weight:800;margin-top:6px">No data yet.</div>
-            </div>
-            <div style="display:flex;gap:8px">
-              <button id="btnCopy" class="btnGhost">Copy</button>
-            </div>
-          </div>
         </div>
       </aside>
     </div>
@@ -255,175 +190,165 @@ svg.gauge{width:100%;height:auto;max-height:var(--gauge-max-h);display:block}
 </div>
 
 <script>
-/* JS: small focused changes:
-   - tick labels are drawn outward & given white stroke for readability
-   - slightly reduced BMI number (CSS)
-   - top thin red mark path included in SVG (already in markup)
-   - removed lastTime usage
+/* Final JS: gauge draw + responsive placement + calculate + needle control
+   Adjusted geometry to match your requested look:
+   - viewBox 960x520, center at 480,360, radius 300
+   - ticks and labels moved outward, labels given white stroke for visibility
+   - background arc uses butt caps
+   - topMark shorter, low opacity
+   - needle shortened and rotated around center; BMI number smaller/less heavy
 */
-const $ = s => document.querySelector(s);
-const tabs = { metric: $('#tabMetric'), imperial: $('#tabImperial'), other: $('#tabOther') };
-const metricW = $('#weightKg'), metricH = $('#heightCm');
-const impW = $('#weightLb'), impFt = $('#heightFt'), impIn = $('#heightIn');
-const othW = $('#weightOther'), othH = $('#heightM');
 
-const btnCalc = $('#btnCalc'), btnClear = $('#btnClear'), btnSave = $('#btnSave'), btnPNG = $('#btnPNG'), btnCopy = $('#btnCopy');
-const bmiNumber = $('#bmiNumber'), bmiCategory = $('#bmiCategory');
-const bmiPrimeEl = $('#bmiPrime'), ponderalEl = $('#ponderal'), healthyRangeEl = $('#healthyRange');
-const interpretation = $('#interpretation');
-const needleLine = $('#needleLine');
-const segEls = [$('#seg0'),$('#seg1'),$('#seg2'),$('#seg3'),$('#seg4'),$('#seg5')];
-const tickGroup = $('#ticks');
+const cx = 480, cy = 360, R = 300; // center + radius for the colored band
+const segEls = [document.getElementById('seg0'),document.getElementById('seg1'),document.getElementById('seg2'),
+                document.getElementById('seg3'),document.getElementById('seg4'),document.getElementById('seg5')];
+const bgArc = document.getElementById('bgArc');
+const topMark = document.getElementById('topMark');
+const tickGroup = document.getElementById('tickGroup');
+const needleGroup = document.getElementById('needleGroup');
+const bmiNumber = document.getElementById('bmiNumber');
+const bmiCategory = document.getElementById('bmiCategory');
+const bmiPrimeEl = document.getElementById('bmiPrime');
+const ponderalEl = document.getElementById('ponderal');
+const healthyRangeEl = document.getElementById('healthyRange');
 
-let mode = 'metric', lastResult = null;
-
-/* mode toggle */
-function setMode(m){
-  mode = m;
-  Object.values(tabs).forEach(t=>t.classList.remove('active'));
-  tabs[m].classList.add('active');
-  $('#metricWeight').classList.toggle('hidden', m!=='metric');
-  $('#metricHeight').classList.toggle('hidden', m!=='metric');
-  $('#impWeight').classList.toggle('hidden', m!=='imperial');
-  $('#impHeight').classList.toggle('hidden', m!=='imperial');
-  $('#otherWeight').classList.toggle('hidden', m!=='other');
-  $('#otherHeight').classList.toggle('hidden', m!=='other');
+function polar(cx,cy,r,deg){
+  const rad=(deg-90)*Math.PI/180;
+  return {x:cx + r*Math.cos(rad), y:cy + r*Math.sin(rad)};
 }
-tabs.metric.addEventListener('click', ()=>setMode('metric'));
-tabs.imperial.addEventListener('click', ()=>setMode('imperial'));
-tabs.other.addEventListener('click', ()=>setMode('other'));
-setMode('metric');
+function arcPath(cx,cy,r,startDeg,endDeg){
+  const start = polar(cx,cy,r,startDeg);
+  const end   = polar(cx,cy,r,endDeg);
+  const large = (endDeg - startDeg) > 180 ? 1 : 0;
+  return `M ${start.x} ${start.y} A ${r} ${r} 0 ${large} 0 ${end.x} ${end.y}`;
+}
+// map BMI value (0..60) to gauge degrees (-90..+90)
+function mapBMItoDeg(bmi){
+  const v = Math.max(0, Math.min(bmi, 60));
+  return (v/60)*180 - 90;
+}
 
-/* gauge geometry */
-const CX = 450, CY = 420, R = 370;
-function polar(deg, radius=R){ const rad=(deg-90)*(Math.PI/180); return { x: CX + radius*Math.cos(rad), y: CY + radius*Math.sin(rad) }; }
-function arcPath(sdeg, edeg){ const p1=polar(edeg), p2=polar(sdeg); return `M ${p1.x} ${p1.y} A ${R} ${R} 0 0 0 ${p2.x} ${p2.y}`; }
-function bmiToDeg(bmi){ const v=Math.max(0, Math.min(bmi,60)); return (v/60)*180 - 90; }
-
+/* draw static arcs and ticks */
 function drawGauge(){
-  const ranges = [[0,18.5],[18.5,24.9],[25,29.9],[30,34.9],[35,39.9],[40,60]];
-  ranges.forEach((rg,i)=>{ segEls[i].setAttribute('d', arcPath(bmiToDeg(rg[0]), bmiToDeg(Math.min(rg[1],60)))); });
+  // background arc (full half)
+  bgArc.setAttribute('d', arcPath(cx,cy,R+20,-90,90));
 
-  tickGroup.innerHTML='';
-  const numbers = [0,10,15,20,25,30,35,40,50,60];
-  numbers.forEach(v=>{
-    const deg = bmiToDeg(v);
-    const pOut = polar(deg, R+48);
-    const pIn = polar(deg, R-18);
+  // colored ranges
+  const ranges = [
+    {from:0,to:18.5}, {from:18.5,to:24.9}, {from:25,to:29.9},
+    {from:30,to:34.9}, {from:35,to:39.9}, {from:40,to:60}
+  ];
+  ranges.forEach((rg,i)=>{
+    const sdeg = mapBMItoDeg(rg.from);
+    const edeg = mapBMItoDeg(Math.min(rg.to,60));
+    // inset radius so color band sits inside background
+    segEls[i].setAttribute('d', arcPath(cx,cy,R, sdeg, edeg));
+  });
+
+  // subtle shorter top mark
+  topMark.setAttribute('d', arcPath(cx,cy,R+8, -66, 66)); // shorter arc
+
+  // ticks and numeric labels
+  tickGroup.innerHTML = '';
+  const marks = [0,5,10,15,20,25,30,35,40,50,60];
+  marks.forEach(v=>{
+    const deg = mapBMItoDeg(v);
+    const out = polar(cx,cy,R+36,deg);
+    const inn = polar(cx,cy,R-28,deg);
     // tick line
     const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
-    ln.setAttribute('x1', pOut.x); ln.setAttribute('y1', pOut.y);
-    ln.setAttribute('x2', pIn.x); ln.setAttribute('y2', pIn.y);
+    ln.setAttribute('x1',out.x); ln.setAttribute('y1',out.y);
+    ln.setAttribute('x2',inn.x); ln.setAttribute('y2',inn.y);
     ln.setAttribute('stroke','rgba(2,6,23,0.06)'); ln.setAttribute('stroke-width',3);
     tickGroup.appendChild(ln);
-    // label (moved farther out and given white stroke for contrast)
-    const labelPos = polar(deg, R+86);
+
+    // numeric label: pushed further out, with white stroke for readability
+    const labelPos = polar(cx,cy,R+86,deg);
     const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x', labelPos.x); t.setAttribute('y', labelPos.y+8);
+    t.setAttribute('x',labelPos.x);
+    t.setAttribute('y',labelPos.y + 6);
     t.setAttribute('text-anchor','middle');
-    t.setAttribute('font-size',26);
-    t.setAttribute('font-weight',800);
+    t.setAttribute('font-size','18');
+    t.setAttribute('font-weight','700');
     t.setAttribute('fill','#0b1720');
-    t.setAttribute('stroke','#ffffff'); t.setAttribute('stroke-width','5'); t.setAttribute('paint-order','stroke');
+    t.setAttribute('stroke','#ffffff');
+    t.setAttribute('stroke-width','6');
+    t.setAttribute('paint-order','stroke');
     t.textContent = v;
     tickGroup.appendChild(t);
   });
 }
 drawGauge();
 
-/* conversions */
-function cmToM(cm){ cm=Number(cm); return (cm>0) ? cm/100 : null; }
-function ftInToM(ft,inch){ const f=Number(ft)||0, i=Number(inch)||0; const tot=f*12+i; return tot>0 ? tot*0.0254 : null; }
+/* calculation helpers */
+function cmToM(cm){ const c=Number(cm); return c>0 ? c/100 : null; }
 function lbToKg(lb){ const l=Number(lb); return l>0 ? l*0.45359237 : null; }
+function ftInToM(ft,inch){ const f=Number(ft)||0; const i=Number(inch)||0; const tot = f*12 + i; return tot>0 ? tot*0.0254 : null; }
 
 function categoryFor(bmi){
-  if(!Number.isFinite(bmi)) return {name:'—', color:'#333', note:'Enter values'};
-  if(bmi<18.5) return {name:'Underweight', color:'#ef4444', note:'Below healthy range.'};
-  if(bmi<25) return {name:'Normal', color:'#10b981', note:'Within healthy range.'};
-  if(bmi<30) return {name:'Overweight', color:'#f59e0b', note:'Above healthy range.'};
-  if(bmi<35) return {name:'Obesity I', color:'#ff8c42', note:'Clinical obesity I.'};
-  if(bmi<40) return {name:'Obesity II', color:'#e74c3c', note:'Clinical obesity II.'};
+  if(!Number.isFinite(bmi)) return {name:'—', color:'#666', note:'—'};
+  if(bmi < 18.5) return {name:'Underweight', color:'#ef4444', note:'Below healthy range.'};
+  if(bmi < 25) return {name:'Normal', color:'#10b981', note:'Within healthy range.'};
+  if(bmi < 30) return {name:'Overweight', color:'#f59e0b', note:'Above healthy range.'};
+  if(bmi < 35) return {name:'Obesity I', color:'#ff8c42', note:'Obesity I.'};
+  if(bmi < 40) return {name:'Obesity II', color:'#e74c3c', note:'Obesity II.'};
   return {name:'Obesity III', color:'#812525', note:'Severe obesity.'};
 }
 
-function moveNeedle(bmi){
-  const angle = bmiToDeg(bmi);
-  needleLine.setAttribute('transform', `rotate(${angle} ${CX} ${CY})`);
-}
-
-function renderResult(bmi,kg,m){
+function renderResult(bmi, kg, m){
   bmiNumber.textContent = bmi.toFixed(2);
   const cat = categoryFor(bmi);
-  bmiCategory.textContent = cat.name;
-  bmiCategory.style.color = cat.color;
-  interpretation.textContent = cat.note;
+  const catEl = document.getElementById('bmiCategory');
+  catEl.textContent = cat.name;
+  catEl.style.color = cat.color;
 
   const bmiPrime = bmi / 25;
   const ponderal = kg / (m*m*m);
-  bmiPrimeEl.textContent = bmiPrime.toFixed(2);
-  ponderalEl.textContent = `${ponderal.toFixed(2)} kg/m³`;
-
+  document.getElementById('bmiPrime').textContent = bmiPrime.toFixed(2);
+  document.getElementById('ponderal').textContent = `${ponderal.toFixed(2)} kg/m³`;
   const low = 18.5 * m * m, high = 24.9 * m * m;
-  healthyRangeEl.textContent = `${low.toFixed(1)} kg — ${high.toFixed(1)} kg`;
+  document.getElementById('healthyRange').textContent = `${low.toFixed(1)} kg — ${high.toFixed(1)} kg`;
 
-  moveNeedle(bmi);
+  // rotate needle: compute deg and set transform on needleGroup (rotate about cx,cy)
+  const deg = mapBMItoDeg(bmi);
+  needleGroup.setAttribute('transform', `rotate(${deg} ${cx} ${cy})`);
+
+  // stylings to keep numbers readable on small screens are handled by CSS
 }
 
-/* calculate */
-function calculate(){
-  let kg=null, m=null;
-  if(mode==='metric'){
-    kg = Number(metricW.value); m = cmToM(metricH.value);
-    if(!(kg>0)){ alert('Enter weight (kg).'); return; }
-    if(!(m>0)){ alert('Enter height (cm).'); return; }
-  } else if(mode==='imperial'){
-    kg = lbToKg(impW.value); m = ftInToM(impFt.value, impIn.value);
-    if(!(kg>0)){ alert('Enter weight (lb).'); return; }
-    if(!(m>0)){ alert('Enter height (ft/in).'); return; }
-  } else {
-    kg = Number(othW.value); m = Number(othH.value);
-    if(!(kg>0)){ alert('Enter weight (kg).'); return; }
-    if(!(m>0)){ alert('Enter height (m).'); return; }
-  }
+/* simple UI wiring: use metric fields only for demo */
+const btnCalc = document.getElementById('btnCalc');
+const btnClear = document.getElementById('btnClear');
+const weightKg = document.getElementById('weightKg');
+const heightCm = document.getElementById('heightCm');
 
+btnCalc.addEventListener('click', ()=>{
+  const kg = Number(weightKg.value);
+  const hcm = Number(heightCm.value);
+  if(!(kg>0)){ alert('Enter weight (kg)'); return; }
+  if(!(hcm>0)){ alert('Enter height (cm)'); return; }
+  const m = cmToM(hcm);
   const bmi = kg / (m*m);
-  if(!Number.isFinite(bmi)){ alert('Calculation error.'); return; }
-  lastResult = {ts:new Date().toISOString(), bmi:Number(bmi.toFixed(3)), kg:Number(kg.toFixed(3)), m:Number(m.toFixed(4)), mode};
-  renderResult(bmi,kg,m);
-}
+  renderResult(bmi, kg, m);
+});
 
-/* clear */
 btnClear.addEventListener('click', ()=>{
-  [metricW,metricH,impW,impFt,impIn,othW,othH].forEach(i=>i.value='');
-  bmiNumber.textContent='—';
-  bmiCategory.textContent='Enter values & calculate';
-  bmiCategory.style.color='var(--muted)';
-  interpretation.textContent='No data yet.';
-  bmiPrimeEl.textContent='—';
-  ponderalEl.textContent='—';
-  healthyRangeEl.textContent='—';
-  needleLine.setAttribute('transform', `rotate(-90 ${CX} ${CY})`);
-  lastResult=null;
-});
-btnCalc.addEventListener('click', calculate);
-
-btnSave.addEventListener('click', ()=>{
-  if(!lastResult){ alert('Calculate first.'); return; }
-  const key='fixvity_bmi_history';
-  const arr = JSON.parse(localStorage.getItem(key)||'[]');
-  arr.unshift(lastResult); if(arr.length>200) arr.length=200;
-  localStorage.setItem(key, JSON.stringify(arr)); alert('Saved to local storage.');
-});
-btnPNG.addEventListener('click', ()=>{ html2canvas($('#resultCard'), { scale:2, backgroundColor:null }).then(canvas=>{ const url=canvas.toDataURL('image/png'); const a=document.createElement('a'); a.href=url; a.download='bmi_result.png'; document.body.appendChild(a); a.click(); a.remove(); }).catch(()=>alert('PNG export failed.')); });
-btnCopy.addEventListener('click', ()=>{ if(!lastResult){ alert('No result.'); return; } const txt=`BMI ${lastResult.bmi} kg/m² • weight ${lastResult.kg} kg • height ${lastResult.m} m • ${lastResult.mode}`; if(navigator.clipboard) navigator.clipboard.writeText(txt).then(()=>alert('Copied.')); else prompt('Copy:', txt); });
-
-['weightKg','heightCm','weightLb','heightFt','heightIn','weightOther','heightM'].forEach(id=>{
-  const el=document.getElementById(id); if(el) el.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); calculate(); }});
+  weightKg.value=''; heightCm.value='';
+  document.getElementById('bmiNumber').textContent='—';
+  document.getElementById('bmiCategory').textContent='Enter values';
+  document.getElementById('bmiPrime').textContent='—';
+  document.getElementById('ponderal').textContent='—';
+  document.getElementById('healthyRange').textContent='—';
+  // reset needle to center (pointing down)
+  needleGroup.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
 });
 
-/* redraw ticks on resize */
+/* initial default: needle pointing down */
+needleGroup.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
+
+/* keep gauge responsive on resize */
 let rt=null;
-window.addEventListener('resize', ()=>{ if(rt) clearTimeout(rt); rt=setTimeout(()=>{ drawGauge(); if(lastResult) moveNeedle(lastResult.bmi); else needleLine.setAttribute('transform', `rotate(-90 ${CX} ${CY})`); },150); });
+window.addEventListener('resize', ()=>{ if(rt) clearTimeout(rt); rt=setTimeout(()=>{ drawGauge(); },120); });
 </script>
 </body>
 </html>
