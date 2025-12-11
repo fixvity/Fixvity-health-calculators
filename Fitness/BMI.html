@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Ultimate BMI Calculator — Fixvity (Full-width gauge)</title>
-<meta name="description" content="Mobile-first Ultimate BMI Calculator. Full-width gauge, Metric/Imperial/Other, precise calculations." />
+<title>Ultimate BMI Calculator — Fixvity (Medium Gauge)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
@@ -18,18 +17,19 @@
   --ok:#10b981;
   --warn:#f59e0b;
   --deep:#08323a;
+  --gauge-max-h:260px; /* medium gauge target for mobile */
   font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;background:var(--bg);-webkit-font-smoothing:antialiased}
-.container{max-width:980px;margin:18px auto;padding:12px}
-.card{background:var(--card);border-radius:16px;padding:14px;box-shadow:0 24px 48px rgba(12,18,24,0.06);overflow:visible}
-.header{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 6px 12px}
+.container{max-width:980px;margin:16px auto;padding:12px}
+.card{background:var(--card);border-radius:16px;padding:12px;box-shadow:0 18px 36px rgba(12,18,24,0.06);overflow:visible}
+.header{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 6px 10px}
 .title{font-size:24px;margin:0;font-weight:800}
 .brand{color:var(--muted);font-weight:600;font-size:13px}
 
-/* main layout */
-.grid{display:grid;grid-template-columns:1fr;gap:14px}
+/* layout grid */
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
 @media(min-width:980px){ .grid{grid-template-columns:1fr 420px} }
 
 /* left inputs */
@@ -48,41 +48,47 @@ label{font-size:13px;color:#0b1720;margin-bottom:6px;display:block}
 .btnPrimary{background:var(--accent);color:white;border:0;padding:10px 14px;border-radius:10px;font-weight:800;cursor:pointer}
 .btnGhost{background:#fff;border:1px solid var(--border);padding:9px 12px;border-radius:10px;cursor:pointer}
 
-/* right results (full-width gauge style) */
+/* right results */
 .results{padding:12px;border-radius:12px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid var(--border);overflow:visible}
-.gaugeFull{width:100%;display:flex;flex-direction:column;align-items:center;gap:12px}
-.svgWrap{width:100%;max-width:760px;display:flex;justify-content:center;align-items:center;padding:4px 8px 0;box-sizing:border-box}
-svg.gauge{width:100%;height:auto;display:block;max-height:260px}
-.needle{position:relative;width:6px;height:110px;border-radius:4px;background:#0f1720;transform-origin:center bottom;box-shadow:0 9px 18px rgba(0,0,0,0.12);transition:transform 700ms cubic-bezier(.18,.8,.24,1)}
-@media(max-width:520px){ .needle{height:76px} }
+.gaugeFull{width:100%;display:flex;flex-direction:column;align-items:center;gap:8px}
 
-/* big result number and category */
-.resultTop{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;width:100%}
+/* svg container: limit height (medium) and center */
+.svgWrap{width:100%;max-width:760px;display:flex;justify-content:center;align-items:center;padding:4px 8px 0;box-sizing:border-box}
+svg.gauge{width:100%;height:auto;max-height:var(--gauge-max-h);display:block}
+
+/* position needle centrally and shorter */
+.needleWrap{position:relative;width:100%;max-width:760px;height:0;margin-top:-10px /* pull needle up a little */;display:flex;justify-content:center;}
+.needle{width:8px;border-radius:6px;background:#08151a;box-shadow:0 8px 12px rgba(0,0,0,0.12);transform-origin:center 92%;height:88px;transition:transform 700ms cubic-bezier(.18,.8,.24,1)}
+/* needle shorter on small screens */
+@media(max-width:520px){ .needle{height:72px;width:7px} }
+
+/* results block compact */
+.resultTop{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;width:100%}
 .leftCol{flex:1}
-.bmiNumber{font-weight:900;font-size:56px;color:var(--deep);margin:0;line-height:0.95}
-@media(max-width:520px){ .bmiNumber{font-size:44px} }
-.unit{font-size:18px;color:var(--muted);margin-left:6px}
-.category{font-size:20px;font-weight:800;margin-top:8px;color:var(--danger)}
-.dateStamp{color:var(--muted);font-size:13px;margin-top:6px}
+.bmiNumber{font-weight:900;font-size:48px;color:var(--deep);margin:0;line-height:0.95}
+@media(max-width:520px){ .bmiNumber{font-size:42px} }
+.unit{font-size:16px;color:var(--muted);margin-left:6px}
+.category{font-size:18px;font-weight:800;margin-top:6px;color:var(--danger)}
+.dateStamp{color:var(--muted);font-size:12px;margin-top:6px}
 
 /* compact cards for details */
-.detailGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;margin-top:12px}
+.detailGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;margin-top:10px}
 @media(max-width:520px){ .detailGrid{grid-template-columns:1fr} }
 .cardItem{background:#fff;border-radius:10px;padding:10px;border:1px solid var(--border)}
 .cardItem .label{color:var(--muted);font-size:13px}
 
-/* interpretation row */
-.interp{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding:12px;border-radius:10px;background:#fff;border:1px solid var(--border)}
+/* interpretation row compact */
+.interp{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding:10px;border-radius:10px;background:#fff;border:1px solid var(--border)}
 .interp .text{font-weight:800}
 
-/* legend (left stacked) */
-.legend{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+/* legend stacked */
+.legend{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .legend .pill{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;background:#fff;border:1px solid var(--border);font-weight:700}
 
-/* small helpers */
+/* helper */
+.hidden{display:none}
 .muted{color:var(--muted)}
 .center{display:flex;align-items:center;justify-content:center}
-.hidden{display:none}
 </style>
 </head>
 <body>
@@ -166,16 +172,16 @@ svg.gauge{width:100%;height:auto;display:block;max-height:260px}
         </div>
       </section>
 
-      <!-- RIGHT: Results (full-width gauge style) -->
+      <!-- RIGHT: Results -->
       <aside class="results" id="resultCard" aria-live="polite">
         <div class="gaugeFull">
-          <!-- SVG gauge (full-width style) -->
-          <div style="width:100%;max-width:900px" class="svgWrap" aria-hidden="false">
+          <!-- SVG gauge -->
+          <div class="svgWrap" aria-hidden="false">
             <svg class="gauge" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet" role="img" aria-label="BMI gauge">
               <!-- background arc -->
               <path d="M80 360 A320 320 0 0 1 820 360" stroke="rgba(2,6,23,0.06)" stroke-width="48" fill="none" stroke-linecap="round"></path>
 
-              <!-- segments: multiple colored arcs -->
+              <!-- colored segments -->
               <path id="seg0" stroke="#ef4444" stroke-width="48" fill="none" stroke-linecap="butt"></path>
               <path id="seg1" stroke="#10b981" stroke-width="48" fill="none" stroke-linecap="butt"></path>
               <path id="seg2" stroke="#f59e0b" stroke-width="48" fill="none" stroke-linecap="butt"></path>
@@ -183,25 +189,25 @@ svg.gauge{width:100%;height:auto;display:block;max-height:260px}
               <path id="seg4" stroke="#e74c3c" stroke-width="48" fill="none" stroke-linecap="butt"></path>
               <path id="seg5" stroke="#812525" stroke-width="48" fill="none" stroke-linecap="butt"></path>
 
-              <!-- ticks and labels -->
+              <!-- ticks (will be generated) -->
               <g id="tickGroup"></g>
             </svg>
           </div>
 
-          <!-- needle: thin medical needle (C1) -->
-          <div style="width:100%;max-width:900px;display:flex;justify-content:center;">
+          <!-- needle, centered over SVG -->
+          <div class="needleWrap" aria-hidden="true">
             <div id="needle" class="needle" style="transform:rotate(-90deg)"></div>
           </div>
 
-          <!-- big number + category -->
-          <div class="resultTop">
+          <!-- number + category compact -->
+          <div class="resultTop" style="margin-top:-6px">
             <div class="leftCol">
-              <div style="display:flex;align-items:end;gap:8px;flex-wrap:wrap">
+              <div style="display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap">
                 <div style="display:flex;align-items:center">
                   <div id="bmiNumber" class="bmiNumber">—</div>
                   <div class="unit">kg/m²</div>
                 </div>
-                <div style="min-width:60px">
+                <div style="min-width:80px">
                   <div id="bmiCategory" class="category" style="color:var(--muted)">Enter values & calculate</div>
                   <div id="lastTime" class="dateStamp">Last: —</div>
                 </div>
@@ -209,7 +215,7 @@ svg.gauge{width:100%;height:auto;display:block;max-height:260px}
             </div>
           </div>
 
-          <div style="display:flex;gap:14px;flex-wrap:wrap;width:100%;">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;width:100%;margin-top:6px;">
             <div style="flex:1;min-width:220px">
               <div class="legend">
                 <div class="pill"><span style="width:14px;height:14px;background:#ef4444;border-radius:6px;display:inline-block"></span>Underweight</div>
@@ -231,7 +237,7 @@ svg.gauge{width:100%;height:auto;display:block;max-height:260px}
             </div>
           </div>
 
-          <div class="interp" style="margin-top:14px">
+          <div class="interp" style="margin-top:10px">
             <div>
               <div class="muted">Interpretation</div>
               <div id="interpretation" class="text" style="font-weight:800;margin-top:6px">No data yet.</div>
@@ -247,11 +253,9 @@ svg.gauge{width:100%;height:auto;display:block;max-height:260px}
 </div>
 
 <script>
-/* Full-width gauge BMI calculator — option C1 (thin needle) */
-/* DOM shortcuts */
+/* Final Medium Gauge (C1) — fixes applied */
+/* DOM helpers */
 const $ = s => document.querySelector(s);
-
-/* Inputs */
 const tabs = { metric: $('#tabMetric'), imperial: $('#tabImperial'), other: $('#tabOther') };
 const metricW = $('#weightKg'), metricH = $('#heightCm');
 const impW = $('#weightLb'), impFt = $('#heightFt'), impIn = $('#heightIn');
@@ -259,7 +263,6 @@ const othW = $('#weightOther'), othH = $('#heightM');
 
 const btnCalc = $('#btnCalc'), btnClear = $('#btnClear'), btnSave = $('#btnSave'), btnPNG = $('#btnPNG'), btnCopy = $('#btnCopy');
 
-/* Results */
 const bmiNumber = $('#bmiNumber'), bmiCategory = $('#bmiCategory'), lastTime = $('#lastTime');
 const bmiPrimeEl = $('#bmiPrime'), ponderalEl = $('#ponderal'), healthyRangeEl = $('#healthyRange');
 const interpretation = $('#interpretation');
@@ -268,15 +271,13 @@ const needle = $('#needle');
 const segEls = [$('#seg0'),$('#seg1'),$('#seg2'),$('#seg3'),$('#seg4'),$('#seg5')];
 const tickGroup = $('#tickGroup');
 
-let mode='metric';
-let lastResult = null;
+let mode='metric', lastResult=null;
 
-/* Mode / tabs */
+/* Mode switch */
 function setMode(m){
-  mode = m;
+  mode=m;
   Object.values(tabs).forEach(t=>t.classList.remove('active'));
   tabs[m].classList.add('active');
-
   $('#metricWeight').classList.toggle('hidden', m!=='metric');
   $('#metricHeight').classList.toggle('hidden', m!=='metric');
   $('#impWeight').classList.toggle('hidden', m!=='imperial');
@@ -289,19 +290,15 @@ tabs.imperial.addEventListener('click', ()=> setMode('imperial'));
 tabs.other.addEventListener('click', ()=> setMode('other'));
 setMode('metric');
 
-/* SVG helpers */
+/* Svg math helpers */
 function polar(cx,cy,r,deg){ const rad=(deg-90)*Math.PI/180; return {x:cx + r*Math.cos(rad), y:cy + r*Math.sin(rad)}; }
 function arcPath(cx,cy,r,startDeg,endDeg){ const p1=polar(cx,cy,r,endDeg); const p2=polar(cx,cy,r,startDeg); const large=(endDeg-startDeg)<=180?0:1; return `M ${p1.x} ${p1.y} A ${r} ${r} 0 ${large} 0 ${p2.x} ${p2.y}`; }
 
-/* map BMI -> degrees across 180deg arc (-90 to +90) */
+/* map BMI to -90->+90 deg across 0..60 scale */
 function mapBMItoDeg(bmi){ const v=Math.max(0,Math.min(bmi,60)); return (v/60)*180 - 90; }
 
-/* format ticks (do NOT include 18.5 label) */
-function formatTickValue(v){ return Number.isInteger(v) ? String(v) : v.toFixed(1); }
-
-/* Draw arcs and ticks (clean, no 18.5 label) */
+/* draw gauge segments + ticks (excluded 18.5 label) */
 function drawGauge(){
-  // viewBox chosen: width 900, centre ~450. cy 360, radius 320
   const cx=450, cy=360, r=320;
   const ranges=[
     {from:0,to:18.5},{from:18.5,to:24.9},{from:25,to:29.9},
@@ -313,34 +310,31 @@ function drawGauge(){
     segEls[i].setAttribute('d', arcPath(cx,cy,r,sdeg,edeg));
   });
 
-  // ticks: choose marks, *exclude* 18.5 label to avoid overlap
+  // ticks (clean) - remove 18.5 tick to avoid visual clutter
   tickGroup.innerHTML='';
-  const marks = [0,10,15,20,25,30,35,40,50,60]; // removed 18.5
+  const marks = [0,10,15,20,25,30,35,40,50,60];
   marks.forEach(v=>{
     const deg = mapBMItoDeg(v);
     const out = polar(cx,cy,r+36,deg);
     const inn = polar(cx,cy,r-18,deg);
-
     const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
     ln.setAttribute('x1', out.x); ln.setAttribute('y1', out.y);
     ln.setAttribute('x2', inn.x); ln.setAttribute('y2', inn.y);
-    ln.setAttribute('stroke','rgba(2,6,23,0.06)');
-    ln.setAttribute('stroke-width',3);
-    ln.setAttribute('shape-rendering','crispEdges');
+    ln.setAttribute('stroke','rgba(2,6,23,0.06)'); ln.setAttribute('stroke-width',3);
     tickGroup.appendChild(ln);
 
     const labelPos = polar(cx,cy,r+64,deg);
     const t = document.createElementNS('http://www.w3.org/2000/svg','text');
     t.setAttribute('x', labelPos.x); t.setAttribute('y', labelPos.y+6);
-    t.setAttribute('text-anchor','middle'); t.setAttribute('font-size',16);
+    t.setAttribute('text-anchor','middle'); t.setAttribute('font-size',14);
     t.setAttribute('fill','#12343a'); t.setAttribute('font-weight',700);
-    t.textContent = formatTickValue(v);
+    t.textContent = (Number.isInteger(v) ? String(v) : v.toFixed(1));
     tickGroup.appendChild(t);
   });
 }
 drawGauge();
 
-/* conversion helpers */
+/* conversions */
 function cmToM(cm){ const c=Number(cm); return c>0 ? c/100 : null; }
 function ftInToM(ft,inch){ const f=Number(ft)||0; const i=Number(inch)||0; const tot = f*12 + i; return tot>0 ? tot*0.0254 : null; }
 function lbToKg(lb){ const l=Number(lb); return l>0 ? l*0.45359237 : null; }
@@ -356,7 +350,7 @@ function categoryFor(bmi){
   return {name:'Obesity III', color:'#812525', note:'Severe obesity.'};
 }
 
-/* render results */
+/* render */
 function renderResult(bmi,kg,m){
   bmiNumber.textContent = bmi.toFixed(2);
   const cat = categoryFor(bmi);
@@ -373,12 +367,12 @@ function renderResult(bmi,kg,m){
   const low = 18.5 * m * m, high = 24.9 * m * m;
   healthyRangeEl.textContent = `${low.toFixed(1)} kg — ${high.toFixed(1)} kg`;
 
-  // needle rotation (thin needle) — round to 2 decimals
+  // needle rotation (thin medical style)
   const ang = Math.round(mapBMItoDeg(bmi) * 100) / 100;
   needle.style.transform = `rotate(${ang}deg)`;
 }
 
-/* calculate */
+/* calculate function */
 function calculate(){
   let kg=null, m=null;
   if(mode==='metric'){
@@ -417,7 +411,7 @@ $('#btnClear').addEventListener('click', ()=>{
   lastResult = null;
 });
 
-/* events */
+/* handlers */
 btnCalc.addEventListener('click', calculate);
 btnSave.addEventListener('click', ()=>{
   if(!lastResult){ alert('Calculate first.'); return; }
@@ -435,14 +429,14 @@ btnCopy.addEventListener('click', ()=>{
   else prompt('Copy:', txt);
 });
 
-/* Enter key triggers calculation */
+/* Enter key to calculate */
 ['weightKg','heightCm','weightLb','heightFt','heightIn','weightOther','heightM'].forEach(id=>{
   const el=document.getElementById(id); if(el) el.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); calculate(); }});
 });
 
-/* window resize: redraw ticks to keep labels crisp on different sizes */
+/* redraw on resize (keeps ticks readable) */
 let redrawTimeout=null;
-window.addEventListener('resize', ()=>{ if(redrawTimeout) clearTimeout(redrawTimeout); redrawTimeout=setTimeout(()=>{ drawGauge(); }, 180); });
+window.addEventListener('resize', ()=>{ if(redrawTimeout) clearTimeout(redrawTimeout); redrawTimeout=setTimeout(()=>{ drawGauge(); }, 160); });
 
 </script>
 </body>
