@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Ultimate BMI Calculator — Needle Fixed</title>
+<title>Ultimate BMI Calculator — Needle Adjusted</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
@@ -20,39 +20,33 @@ html,body{height:100%;margin:0;background:var(--bg);-webkit-font-smoothing:antia
 .title{font-size:28px;margin:0;font-weight:800}
 .brand{color:var(--muted);font-weight:600;font-size:13px}
 
-/* simple grid */
+/* grid */
 .grid{display:grid;grid-template-columns:1fr;gap:12px}
 @media(min-width:980px){ .grid{grid-template-columns:1fr 420px} }
 
-/* left inputs (kept simple) */
+/* input area */
 .inputs{padding:12px;border-radius:12px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid var(--border)}
 .input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);font-size:15px;background:transparent}
 .controls{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap;justify-content:space-between}
 .btnPrimary{background:var(--accent);color:white;border:0;padding:10px 14px;border-radius:10px;font-weight:800;cursor:pointer}
 .btnGhost{background:#fff;border:1px solid var(--border);padding:9px 12px;border-radius:10px;cursor:pointer}
 
-/* RIGHT: results + gauge */
+/* results / gauge */
 .results{padding:12px;border-radius:12px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid var(--border);overflow:visible}
 .svgWrap{width:100%;display:flex;justify-content:center;align-items:center;padding:6px 18px 0;box-sizing:border-box}
 svg.gauge{width:100%;height:auto;display:block}
-
-/* BMI number — slightly thinner & responsive (reduced weight/size) */
 .bmiNumber{font-weight:600;font-size:36px;color:var(--deep);margin:0;line-height:0.95}
 @media(min-width:900px){ .bmiNumber{font-size:46px} }
 .unit{font-size:16px;color:var(--muted);margin-left:8px}
 .category{font-size:22px;font-weight:800;margin-left:18px}
-
-/* pills + details */
 .pill{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;background:#fff;border:1px solid var(--border);font-weight:700;margin-top:8px}
 .detailGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
 @media(max-width:520px){ .detailGrid{grid-template-columns:1fr} }
 .cardItem{background:#fff;border-radius:10px;padding:10px;border:1px solid var(--border)}
 .muted{color:var(--muted);font-size:13px}
 
-/* tiny adjustments to push svg a bit higher on small screens*/
-@media(max-width:420px){
-  .svgWrap{padding-top:2px}
-}
+/* small upward nudge for svg on narrow screens */
+@media(max-width:420px){ .svgWrap{padding-top:2px} }
 </style>
 </head>
 <body>
@@ -64,7 +58,7 @@ svg.gauge{width:100%;height:auto;display:block}
     </div>
 
     <div class="grid">
-      <!-- LEFT: inputs (unchanged) -->
+      <!-- LEFT (inputs) -->
       <section class="inputs" aria-label="Calculator inputs">
         <div style="display:flex;gap:8px;margin-bottom:12px">
           <button id="tabMetric" style="padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:#e8fbfd;font-weight:700">Metric</button>
@@ -110,12 +104,11 @@ svg.gauge{width:100%;height:auto;display:block}
         </div>
       </section>
 
-      <!-- RIGHT: modified gauge/result section (needle shortened) -->
+      <!-- RIGHT (results + gauge) -->
       <aside class="results" id="resultCard" aria-live="polite">
         <div class="svgWrap" aria-hidden="false">
-          <!-- viewBox sized to allow outer labels -->
           <svg id="gauge" class="gauge" viewBox="0 0 960 520" preserveAspectRatio="xMidYMid meet" role="img" aria-label="BMI gauge">
-            <!-- outer background semicircle -->
+            <!-- background semi arc -->
             <path id="bg" d="" stroke="rgba(0,0,0,0.06)" stroke-width="60" fill="none" stroke-linecap="butt"></path>
 
             <!-- colored segments -->
@@ -126,20 +119,18 @@ svg.gauge{width:100%;height:auto;display:block}
             <path id="seg4" stroke="#e74c3c" stroke-width="56" fill="none" stroke-linecap="butt"></path>
             <path id="seg5" stroke="#812525" stroke-width="56" fill="none" stroke-linecap="butt"></path>
 
-            <!-- subtle top red mark (short semi arc like your sketch) -->
+            <!-- subtle top red mark -->
             <path id="topMark" d="" stroke="#ef4444" stroke-opacity="0.12" stroke-width="10" fill="none" stroke-linecap="round"></path>
 
             <!-- ticks and labels -->
             <g id="ticks"></g>
 
-            <!-- needle (shorter now so it doesn't touch below the semi arc) -->
-            <!-- NOTE: shortened y2 (top) and base remains at y=400 -->
-            <line id="needle" x1="480" y1="400" x2="480" y2="260" stroke="#08151a" stroke-width="8" stroke-linecap="round" transform="rotate(-90 480 400)"></line>
-            <circle cx="480" cy="400" r="12" fill="#08151a"></circle>
+            <!-- needle (SHORTENED) - changed here: y2 moved from 260 -> 320 and stroke-width reduced to 6 -->
+            <line id="needle" x1="480" y1="400" x2="480" y2="320" stroke="#08151a" stroke-width="6" stroke-linecap="round" transform="rotate(-90 480 400)"></line>
+            <circle cx="480" cy="400" r="10" fill="#08151a"></circle>
           </svg>
         </div>
 
-        <!-- result row: BMI number + unit + category (no "last seen") -->
         <div style="margin-top:6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <div style="display:flex;align-items:center">
             <div id="bmiNumber" class="bmiNumber">—</div>
@@ -150,7 +141,6 @@ svg.gauge{width:100%;height:auto;display:block}
           </div>
         </div>
 
-        <!-- legend and details -->
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">
           <div style="flex:1;min-width:220px">
             <div>
@@ -179,7 +169,7 @@ svg.gauge{width:100%;height:auto;display:block}
 </div>
 
 <script>
-/* Needle shortened fix only + gauge rendering + calculation */
+/* geometry constants */
 const CX = 480, CY = 400, R = 300;
 const segEls = ['seg0','seg1','seg2','seg3','seg4','seg5'].map(id=>document.getElementById(id));
 const bg = document.getElementById('bg'), topMark = document.getElementById('topMark'), ticksG = document.getElementById('ticks');
@@ -279,7 +269,6 @@ btnClear.addEventListener('click', ()=>{
 });
 needle.setAttribute('transform', `rotate(-90 ${CX} ${CY})`);
 
-/* redraw on resize so labels stay aligned */
 let rt;
 window.addEventListener('resize', ()=>{ if(rt) clearTimeout(rt); rt=setTimeout(()=>{ drawGauge(); },120); });
 </script>
